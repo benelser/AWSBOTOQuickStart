@@ -66,7 +66,7 @@ aws_secret_access_key=MYSUPERSECRETACCESSKEYHERE
 
 7. Kicking the Tires
 
-Create new .py file containing the following code
+Create new [AWSGettingStarted.py](./AWSGettingStarted.py) file containing the following code
 ```python
 import botostubs, boto3
 
@@ -81,7 +81,7 @@ for bucket in response['Buckets']:
 ```
 Execute your code:
 ```bash
-python3 MYCODESNIPPET.py
+python3 AWSGettingStarted.py
 ```
 #### Expected Output
 ```bash
