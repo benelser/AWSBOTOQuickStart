@@ -1,4 +1,4 @@
-import botostubs, boto3, sys, os, stat, base64
+import botostubs, boto3, sys, os, stat, base64, time
 
 class bcolors:
     HEADER = '\033[95m'
@@ -93,6 +93,19 @@ def CreateInsightVMSecurityGroup():
     else:
         print(f"{bcolors.OKGREEN}InsightVM Security Group alrady exists{bcolors.ENDC}")
 
+def GetPublicIp(instanceid):
+    time.sleep(5)
+    os.system('clear')
+    print(f"{bcolors.OKGREEN}Fetching public ipv4 address for instance: {instanceid}{bcolors.ENDC}")
+    time.sleep(10)
+    publicIpv4 = ""
+    instances = ec2.instances
+    for i in instances.all():
+        if i.id == instanceid:
+            publicIpv4 += i.public_ip_address
+            os.system('clear')
+            return publicIpv4
+
 def CreateEC2(keypair, path):
     # Read in shell script to execute on startup --runs as root
     if not os.path.exists(f"{path}/startup.sh"):
@@ -102,7 +115,7 @@ def CreateEC2(keypair, path):
     f = open('./startup.sh', encoding='ascii')
     startUpScript = f.read()
     print(f"{bcolors.OKGREEN}Creating EC2{bcolors.ENDC}")
-    instances = ec2.create_instances(
+    instance = ec2.create_instances(
         ImageId='ami-0d5d9d301c853a04a',
         MinCount=1,
         MaxCount=1,
@@ -113,13 +126,16 @@ def CreateEC2(keypair, path):
         ],
         UserData=startUpScript,
     )
-
+    return instance[0].id
+    
 def Main():
     path =f'{os.environ["HOME"]}/.aws'
     keypair_name = "ec2-keypair"
     SetUpEnv(path)
     CreatePreSharedKey("ec2-keypair", path)
     CreateInsightVMSecurityGroup()
-    CreateEC2(keypair_name, path)
+    instanceid = CreateEC2(keypair_name, path)
+    publicipv4 = GetPublicIp(instanceid)
+    print(f"{bcolors.OKGREEN}\n\nUSING your browser navigate to:\n\thttps://{publicipv4}:3780{bcolors.ENDC}")
 
 Main()
