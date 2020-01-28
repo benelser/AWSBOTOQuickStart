@@ -1,5 +1,15 @@
 import botostubs, boto3, sys, os, stat, base64
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 ec2 = boto3.resource('ec2', region_name='us-east-2')
 
 def KeyPairExist(name):
@@ -18,7 +28,7 @@ def CreatePreSharedKeyFile(f, name):
 
 def SetUpEnv(path):
     if not os.path.exists(path):
-        print("Creating %s" % path)
+        print(f"{bcolors.OKGREEN}Creating %s{bcolors.ENDC}" % path)
         os.mkdir(path)
     os.chdir(path) 
 
@@ -27,26 +37,31 @@ def CreatePreSharedKey(keyname, path):
     if not os.path.exists(key_file):
         # call the boto ec2 function to create a key pair
         try:
-            print("Attempting to create key")
+            print(f"{bcolors.WARNING}Attempting to create key{bcolors.ENDC}")
             if not KeyPairExist(keyname):
                 CreatePreSharedKeyFile(key_file, keyname)
             else: 
-                print(f"Key: {keyname} alraedy exists")
+                print(f"{bcolors.OKGREEN}Key: {keyname} alraedy exists{bcolors.ENDC}")
         except:
-            sys.exit("Something went wrong while attempting to create pre-shared key.")
+            sys.exit(f"{bcolors.FAIL}Something went wrong while attempting to create pre-shared key.{bcolors.ENDC}")
     else:
-        print(f"{keyname} at {key_file} already exists. Continuing deployment")
+        print(f"{bcolors.OKGREEN}{keyname} at {key_file} already exists. Continuing deployment{bcolors.ENDC}")
 
 def SecurityGroupExists(SGName):
     try:
-        ec2.SecurityGroup(id=SGName)
-        return True
+        security_groups = ec2.security_groups
+        for sg in security_groups.all(): 
+            if sg.group_name == SGName:
+                return True
+            else:
+                return False
     except:
         return False
     
 def CreateInsightVMSecurityGroup():
 
     if not SecurityGroupExists('InsightVM'):
+        print(f"{bcolors.OKGREEN}Creating InsightVM Security Group{bcolors.ENDC}")
         # Create Security Group autorizing ssh and 3780 to console
         sg = ec2.create_security_group(GroupName='InsightVM', Description="Console/Engine_Connectivity")
         sg.authorize_ingress(
@@ -75,30 +90,29 @@ def CreateInsightVMSecurityGroup():
                 },
             ],
         )
-        return sg.group_id
     else:
-        print("InsightVM Security Group alrady exists")
+        print(f"{bcolors.OKGREEN}InsightVM Security Group alrady exists{bcolors.ENDC}")
 
-def CreateEC2(keypair):
+def CreateEC2(keypair, path):
     # Read in shell script to execute on startup --runs as root
     if not os.path.exists(f"{path}/startup.sh"):
-        print("startup.sh not found. Attempting to pull down....")
-        sys.exit("Startup.sh needs to be in the same folder as this script.")
+        print(f"{bcolors.FAIL}startup.sh not found.{bcolors.ENDC}")
+        sys.exit(f"{bcolors.FAIL}Startup.sh needs to be in the same folder as this script.{bcolors.ENDC}")
 
     f = open('./startup.sh', encoding='ascii')
     startUpScript = f.read()
-    print("Creating EC2")
-    """ instances = ec2.create_instances(
+    print(f"{bcolors.OKGREEN}Creating EC2{bcolors.ENDC}")
+    instances = ec2.create_instances(
         ImageId='ami-0d5d9d301c853a04a',
         MinCount=1,
         MaxCount=1,
-        InstanceType='t2.micro',
+        InstanceType='t2.medium',
         KeyName=keypair,
         SecurityGroupIds=[
             'InsightVM',
         ],
         UserData=startUpScript,
-    ) """
+    )
 
 def Main():
     path =f'{os.environ["HOME"]}/.aws'
@@ -106,6 +120,6 @@ def Main():
     SetUpEnv(path)
     CreatePreSharedKey("ec2-keypair", path)
     CreateInsightVMSecurityGroup()
-    CreateEC2(keypair_name)
+    CreateEC2(keypair_name, path)
 
 Main()
