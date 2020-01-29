@@ -1,5 +1,5 @@
 # Getting Started with AWS SDK (boto3) and Rapid7 Products
-This repo is a collection of python code that levarages the boto3 aws sdk to provision services. This code is not production ready or intended to be used in production. This code is not supported by Rapid7. If you are still exited please continue reading.
+This repo is a collection of python code that levarages the boto3 aws sdk to provision services. This code is not production ready or intended to be used in production. This code is not supported by Rapid7. If you are still excited please continue reading.
 
 1. Create [AWS free-tier account](https://aws.amazon.com/free/?all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc) 
 
