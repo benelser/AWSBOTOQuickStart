@@ -4,7 +4,7 @@ This repo is a collection of python code that levarages the boto3 aws sdk to pro
 1. Create [AWS free-tier account](https://aws.amazon.com/free/?all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc) 
 
 2. Install Dependencies (python3 boto3)
-    * MAC
+    * **MAC**
         Install brew [brew](https://brew.sh/)
         ```bash
         /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -16,7 +16,7 @@ This repo is a collection of python code that levarages the boto3 aws sdk to pro
         python3 -m pip install boto3
         python3 -m pip install boto3 botostubs
         ```
-    * ubuntu
+    * **ubuntu**
         Install python3 & AWS SDK [boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html)
         ```bash
         sudo apt-get install python3-pip
@@ -24,7 +24,7 @@ This repo is a collection of python code that levarages the boto3 aws sdk to pro
         python3 -m pip install boto3
         python3 -m pip install boto3 botostubs
         ```
-    * Windows
+    * **Windows**
         Install [chocolatey](https://chocolatey.org)
         Run from an elevated Administrator Session (right click runas Administrator)
         ```powershell
@@ -80,14 +80,14 @@ Write up of the steps can be found below:
 [Enable Intellisense for AWS Boto3 Type Hints in Microsoft Visual Studio Code](https://trevorsullivan.net/2019/06/11/intellisense-microsoft-vscode-aws-boto3-python/)
 
 6. Create AWS Credential File
-    * MAC & Linux
+    * **MAC & Linux**
         ```bash
         mkdir -p ~/.aws/ 
         cd ~/.aws/ 
         touch credentials
         code credentials
         ```
-    * Windows
+    * **Windows**
         ```powershell
         cd $env:USERPROFILE
         mkdir .\.aws  
