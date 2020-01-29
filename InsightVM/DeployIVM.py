@@ -11,21 +11,7 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 ec2 = boto3.resource('ec2', region_name='us-east-2')
-
-def KeyPairExist(name):
-    try:
-        ec2.KeyPair(name)
-        return True
-    except:
-        return False
-
-def CreatePreSharedKeyFile(f, name):
-    outfile = open(f, 'w')
-    key_pair = ec2.create_key_pair(KeyName=name)
-    key_pair_out = str(key_pair.key_material)
-    outfile.write(key_pair_out)
-    os.chmod(f, stat.S_IREAD)
-
+        
 def SetUpEnv(path):
     if not os.path.exists(path):
         print(f"{bcolors.OKGREEN}Creating %s{bcolors.ENDC}" % path)
@@ -34,19 +20,23 @@ def SetUpEnv(path):
 
 def CreatePreSharedKey(keyname, path):
     key_file=f'{path}/{keyname}.pem'
-    if not os.path.exists(key_file):
-        # call the boto ec2 function to create a key pair
-        try:
-            print(f"{bcolors.WARNING}Attempting to create key{bcolors.ENDC}")
-            if not KeyPairExist(keyname):
-                CreatePreSharedKeyFile(key_file, keyname)
-            else: 
-                print(f"{bcolors.OKGREEN}Key: {keyname} alraedy exists{bcolors.ENDC}")
-        except:
-            sys.exit(f"{bcolors.FAIL}Something went wrong while attempting to create pre-shared key.{bcolors.ENDC}")
-    else:
-        print(f"{bcolors.OKGREEN}{keyname} at {key_file} already exists. Continuing deployment{bcolors.ENDC}")
-
+    # call the boto ec2 function to create a key pair
+    print(f"{bcolors.WARNING}Attempting to create key{bcolors.ENDC}")
+    try:
+        key = ec2.create_key_pair(KeyName=keyname)
+        print(f"{bcolors.OKGREEN}Creating key name: {keyname} {bcolors.ENDC}")
+        print(f"{bcolors.WARNING}Checking to see if: {key_file} exists. {bcolors.ENDC}")
+        if not os.path.exists(key_file):
+            print(f"{bcolors.FAIL}{key_file} does not exists. {bcolors.ENDC}")
+            print(f"{bcolors.OKGREEN}Creating: {key_file}{bcolors.ENDC}")
+            outfile = open(key_file, 'w')
+            key_pair_out = str(key.key_material)
+            print(f"{bcolors.WARNING}Writing key: {keyname} to {key_file} {bcolors.ENDC}")
+            outfile.write(key_pair_out)
+            os.chmod(key_file, stat.S_IREAD)
+    except:
+        print(f"{bcolors.OKGREEN}Key name: {keyname} already exists. Make sure you have access to .pem{bcolors.ENDC}")
+               
 def SecurityGroupExists(SGName):
     try:
         security_groups = ec2.security_groups
