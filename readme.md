@@ -90,8 +90,5 @@ Existing S3 buckets....
 myboto3createdbucket
 ```
 
-## Rapid7 trials Getting Started 
+## Rapid7 Builds 
 1. [InsightVM](./InsightVM)
-    * Ensure you have followed the steps above
-    * Are running code from MAC management laptop
-    * Ensure you have internet access (I have to state this :|)
