@@ -44,7 +44,7 @@ This repo is a collection of python code that levarages the boto3 aws sdk to pro
         python -m pip install boto3 botostubs
         ```
 
-4. Set Up Access in [IAM](https://console.aws.amazon.com/iam/)
+3. Set Up Access in [IAM](https://console.aws.amazon.com/iam/)
     - Delete your root access keys
     - Activate MFA on your root account (Okta works great)
     - Create and Apply IAM password policy
@@ -60,7 +60,7 @@ This repo is a collection of python code that levarages the boto3 aws sdk to pro
         - Access key ID
         - Secret
 
-5. Set up Dev Env
+4. Set up Dev Env
 - Install [VS Code](https://code.visualstudio.com/)
 - Install the [Python extension for VS Code](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 - At the top of your Python script file: 
@@ -79,7 +79,7 @@ iam = boto3.client('iam') # type: botostubs.IAM
 Write up of the steps can be found below:
 [Enable Intellisense for AWS Boto3 Type Hints in Microsoft Visual Studio Code](https://trevorsullivan.net/2019/06/11/intellisense-microsoft-vscode-aws-boto3-python/)
 
-6. Create AWS Credential File
+5. Create AWS Credential File
     * **MAC & Linux**
         ```bash
         mkdir -p ~/.aws/ 
@@ -102,7 +102,7 @@ Write up of the steps can be found below:
     aws_secret_access_key=MYSUPERSECRETACCESSKEYHERE
     ```
 
-7. Kicking the Tires Test Setup
+6. Kicking the Tires Test Setup
 
 Create new .py file containing the following code
 ```python
