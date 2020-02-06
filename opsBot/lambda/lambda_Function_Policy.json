@@ -1,0 +1,121 @@
+{
+    "permissionsBoundary": {},
+    "roleName": "LambdaCloudwatch-ex",
+    "policies": [
+      {
+        "document": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:DescribeStackResources",
+                "cloudformation:DescribeStacks",
+                "cloudformation:GetTemplate",
+                "cloudformation:ListStackResources",
+                "cloudwatch:*",
+                "cognito-identity:ListIdentityPools",
+                "cognito-sync:GetCognitoEvents",
+                "cognito-sync:SetCognitoEvents",
+                "dynamodb:*",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeVpcs",
+                "events:*",
+                "iam:GetPolicy",
+                "iam:GetPolicyVersion",
+                "iam:GetRole",
+                "iam:GetRolePolicy",
+                "iam:ListAttachedRolePolicies",
+                "iam:ListRolePolicies",
+                "iam:ListRoles",
+                "iam:PassRole",
+                "iot:AttachPrincipalPolicy",
+                "iot:AttachThingPrincipal",
+                "iot:CreateKeysAndCertificate",
+                "iot:CreatePolicy",
+                "iot:CreateThing",
+                "iot:CreateTopicRule",
+                "iot:DescribeEndpoint",
+                "iot:GetTopicRule",
+                "iot:ListPolicies",
+                "iot:ListThings",
+                "iot:ListTopicRules",
+                "iot:ReplaceTopicRule",
+                "kinesis:DescribeStream",
+                "kinesis:ListStreams",
+                "kinesis:PutRecord",
+                "kms:ListAliases",
+                "lambda:*",
+                "logs:*",
+                "s3:*",
+                "sns:ListSubscriptions",
+                "sns:ListSubscriptionsByTopic",
+                "sns:ListTopics",
+                "sns:Publish",
+                "sns:Subscribe",
+                "sns:Unsubscribe",
+                "sqs:ListQueues",
+                "sqs:SendMessage",
+                "tag:GetResources",
+                "xray:PutTelemetryRecords",
+                "xray:PutTraceSegments"
+              ],
+              "Resource": "*"
+            }
+          ]
+        },
+        "name": "AWSLambdaFullAccess",
+        "id": "ANPAI6E2CYYMI4XI7AA5K",
+        "type": "managed",
+        "arn": "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
+      },
+      {
+        "document": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "execute-api:Invoke",
+                "execute-api:ManageConnections"
+              ],
+              "Resource": "arn:aws:execute-api:*:*:*"
+            }
+          ]
+        },
+        "name": "AmazonAPIGatewayInvokeFullAccess",
+        "id": "ANPAIIWAX2NOOQJ4AIEQ6",
+        "type": "managed",
+        "arn": "arn:aws:iam::aws:policy/AmazonAPIGatewayInvokeFullAccess"
+      },
+      {
+        "document": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "CloudWatchEventsFullAccess",
+              "Effect": "Allow",
+              "Action": "events:*",
+              "Resource": "*"
+            },
+            {
+              "Sid": "IAMPassRoleForCloudWatchEvents",
+              "Effect": "Allow",
+              "Action": "iam:PassRole",
+              "Resource": "arn:aws:iam::*:role/AWS_Events_Invoke_Targets"
+            }
+          ]
+        },
+        "name": "CloudWatchEventsFullAccess",
+        "id": "ANPAJZLOYLNHESMYOJAFU",
+        "type": "managed",
+        "arn": "arn:aws:iam::aws:policy/CloudWatchEventsFullAccess"
+      }
+    ],
+    "trustedEntities": [
+      "lambda.amazonaws.com",
+      "events.amazonaws.com"
+    ]
+  }
