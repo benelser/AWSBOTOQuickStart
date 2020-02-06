@@ -9,7 +9,8 @@ import re
 # Token is used in POST request back to slack private channel
 # Bot scope needed: chat:write, im:history
 # Subscribe bot to event subscriptions: message.im
-BOT_TOKEN = 'xoxb-2697193399-926657851395-Q1e12Kk1KGqiwwNW8PH4daO3'
+
+BOT_TOKEN = 'KEY HERE' # This key needs to be embedded into lambda ENV variable
 SLACK_URL = "https://slack.com/api/chat.postMessage"
 
 def myFirstLambda(event, context):

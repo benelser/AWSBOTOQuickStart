@@ -3,3 +3,4 @@ $desktop = "$env:USERPROFILE\Desktop"
 $asp = "$desktop\AppSpiderFullSetup.exe"
 Invoke-WebRequest -Uri $uri -OutFile $asp
 & $asp /S install /UI /CMD
+Restart-Computer
