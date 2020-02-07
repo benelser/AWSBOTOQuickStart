@@ -49,27 +49,29 @@ def SecurityGroupExists(SGName):
         return False
     
 def CreateASPSecurityGroup():
-
-    if not SecurityGroupExists('ASP'):
-        print(f"{bcolors.OKGREEN}Creating ASP Security Group{bcolors.ENDC}")
-        # Create Security Group autorizing ssh and 3780 to console
-        sg = ec2.create_security_group(GroupName='ASP', Description="RDP")
-        sg.authorize_ingress(
-            IpPermissions=[
-                {
-                    'FromPort': 3389,
-                    'IpProtocol': 'tcp',
-                    'IpRanges': [
-                        {
-                            'CidrIp': '0.0.0.0/0',
-                            'Description': 'console'
-                        },
-                    ],
-                    'ToPort': 3780,
-                },
-            ],
-        )
-    else:
+    try:
+        if not SecurityGroupExists('ASP'):
+            print(f"{bcolors.OKGREEN}Creating ASP Security Group{bcolors.ENDC}")
+            # Create Security Group autorizing ssh and 3780 to console
+            sg = ec2.create_security_group(GroupName='ASP', Description="RDP")
+            sg.authorize_ingress(
+                IpPermissions=[
+                    {
+                        'FromPort': 3389,
+                        'IpProtocol': 'tcp',
+                        'IpRanges': [
+                            {
+                                'CidrIp': '0.0.0.0/0',
+                                'Description': 'console'
+                            },
+                        ],
+                        'ToPort': 3780,
+                    },
+                ],
+            )
+        else:
+            print(f"{bcolors.OKGREEN}ASP Security Group alrady exists{bcolors.ENDC}")
+    except:
         print(f"{bcolors.OKGREEN}ASP Security Group alrady exists{bcolors.ENDC}")
 
 def GetPublicIp(instanceid):
@@ -121,11 +123,11 @@ def CreateSSMMangedRole():
 
 def CreateEC2(keypair, path):
     # Read in shell script to execute on startup --runs as root
-    if not os.path.exists(f"{path}/ivminstall.sh"):
-        print(f"{bcolors.FAIL}ivminstall.sh not found.{bcolors.ENDC}")
-        sys.exit(f"{bcolors.FAIL}ivminstall.sh needs to be in the same folder as this script.{bcolors.ENDC}")
+    if not os.path.exists(f"{path}/install.ps1"):
+        print(f"{bcolors.FAIL}install.ps1 not found.{bcolors.ENDC}")
+        sys.exit(f"{bcolors.FAIL}install.ps1 needs to be in the same folder as this script.{bcolors.ENDC}")
     os.chdir(path)
-    f = open('./ivminstall.sh', encoding='ascii')
+    f = open('./install.ps1', encoding='UTF-8')
     startUpScript = f.read()
     print(f"{bcolors.OKGREEN}Creating EC2{bcolors.ENDC}")
     instance = ec2.create_instances(
@@ -170,6 +172,8 @@ def WaitForInstance(i):
     os.system('clear')
     print(f"{bcolors.WARNING}\n\nWaiting for instance: {i} to be ready. You should go grab a coffee{bcolors.ENDC}")
     waiter = client.get_waiter('instance_status_ok')
+    waiter.config.max_attempts = 50
+    waiter.config.delay = 30
     waiter.wait(InstanceIds=[i])
 
 def Main():
@@ -177,13 +181,11 @@ def Main():
     path =f'{os.environ["HOME"]}/.aws'
     keypair_name = "ec2-keypair"
     CreatePreSharedKey(keypair_name, path)
-    CreateInsightVMSecurityGroup()
+    CreateASPSecurityGroup()
     CreateSSMMangedRole()
     instanceid = CreateEC2(keypair_name, scriptDir)
     WaitForInstance(instanceid)
-    CheckService(instanceid)
     publicipv4 = GetPublicIp(instanceid)
-    print(f"{bcolors.OKGREEN}\n\nUSING your browser navigate to:\n\thttps://{publicipv4}:3780{bcolors.ENDC}")
+    print(f"{bcolors.OKGREEN}\n\nUSING you RDP client connect to {publicipv4}{bcolors.ENDC}")
    
 Main()
-
