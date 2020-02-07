@@ -186,6 +186,7 @@ def Main():
     instanceid = CreateEC2(keypair_name, scriptDir)
     WaitForInstance(instanceid)
     publicipv4 = GetPublicIp(instanceid)
+    print(f"{bcolors.WARNING}\n\nGive AppSpider Pro a few minutes to install. Your EC2 instance will restart automatically.{bcolors.ENDC}")
     print(f"{bcolors.OKGREEN}\n\nUSING your RDP client connect to {publicipv4}{bcolors.ENDC}")
    
 Main()
