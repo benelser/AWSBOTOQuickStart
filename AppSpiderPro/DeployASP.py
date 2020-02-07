@@ -186,6 +186,6 @@ def Main():
     instanceid = CreateEC2(keypair_name, scriptDir)
     WaitForInstance(instanceid)
     publicipv4 = GetPublicIp(instanceid)
-    print(f"{bcolors.OKGREEN}\n\nUSING you RDP client connect to {publicipv4}{bcolors.ENDC}")
+    print(f"{bcolors.OKGREEN}\n\nUSING your RDP client connect to {publicipv4}{bcolors.ENDC}")
    
 Main()
