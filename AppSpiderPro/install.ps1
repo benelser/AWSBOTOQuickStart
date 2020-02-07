@@ -1,37 +1,12 @@
 <powershell>
-function InstallExe {
-    
-    $uri = "http://download2.rapid7.com/download/AppSpider/AppSpiderFullSetup.exe"
-    $desktop = "$env:USERPROFILE\Desktop"
-    $asp = "$desktop\AppSpiderFullSetup.exe"
-    Invoke-WebRequest -Uri $uri -OutFile $asp
-    & $asp /S install /UI /CMD
-}
-
-# Attempt to download installer
-InstallExe
-$attempts = 0
-$count - 0
-while (!(Get-Item "$desktop\install.log")) {
-    Write-Output "Inside log counter lop: $count" >> "$desktop\installer.log"
-    $count ++
-    if ($attempts -eq 3) {
-        Write-Output "Failed to download installer" > "$desktop\download.log"
-        Restart-Computer
-    }
-    InstallExe
-    $attempts ++
-}
-
-$count = 0
-# Loop until program has been installed
-while ($true)
-{
-    Write-Output "Inside software install check loop: $count" >> "$desktop\installer.log"
-    if((Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName | Where-Object {$_.DisplayName -like "*appspider*"}))
-    {
-        Restart-Computer -Force
-    }
-}
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+$url = "https://raw.githubusercontent.com/benelser/AWSBOTOQuickStart/master/AppSpiderPro/installer.ps1"
+$output = "C:\Windows\Temp\installer.ps1"
+$WebClient= New-Object net.webclient
+$script = $WebClient.DownloadString($url)
+$script > $output
+#$command = Get-Content $output
+$bytes = [System.Text.Encoding]::Unicode.GetBytes($script)
+$encodedCommand = [Convert]::ToBase64String($bytes)
+powershell.exe -encodedCommand $encodedCommand
 </powershell>
-
