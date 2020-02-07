@@ -20,6 +20,7 @@ while (!(Get-Item "$desktop\install.log")) {
 
     Write-Output "Install Attempts: $attempts" >> $installerLog
     if ($attempts -eq 2) {
+        Write-Output "Something went wrong while attempting to install ASP" >> $installerLog
         Restart-Computer
     }
     InstallExe
