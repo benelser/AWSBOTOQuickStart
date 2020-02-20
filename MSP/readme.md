@@ -31,5 +31,3 @@ ssh -L 3790:localhost:3790 -N -f ec2-user@PublicDNS -i key_pairs.pem
 ### Browse to:
 https://localhost:3790
 
-https://3.12.155.208:3780
-
