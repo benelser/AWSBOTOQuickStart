@@ -205,7 +205,7 @@ def CreateEC2(keypair, path):
         ImageId='ami-0d5d9d301c853a04a',
         MinCount=1,
         MaxCount=1,
-        InstanceType='t2.medium',
+        InstanceType='t2.xlarge',
         KeyName=keypair,
         SecurityGroupIds=[
             'InsightVM',
