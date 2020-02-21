@@ -1,4 +1,6 @@
-import botostubs, boto3, sys, os, stat, base64, time, json
+import urllib.request, json, encodings, ssl, gzip, botostubs, boto3, sys, os, stat, base64, time
+from getpass import getpass
+from urllib.parse import urlencode, quote_plus
 
 class bcolors:
     HEADER = '\033[95m'
@@ -15,67 +17,64 @@ client = boto3.client('ec2', region_name='us-east-2')
 iam = boto3.client('iam')
 ssm_client = boto3.client('ssm', region_name="us-east-2") 
 
-def ExecuteNetstat(i):
-    response = ssm_client.send_command(
-                InstanceIds=[
-                    i,
-                    ],
-                DocumentName="AWS-RunShellScript",
-                Parameters={
-                    'commands':[
-                        'netstat -plnt | grep 3780 && echo "True" || echo "False"'
-                    ]
-                }
-        )
-    
-    command_id = response['Command']['CommandId']
-    return command_id
+def getConsoleCookie(console_url):
+    req = urllib.request.Request(url=f"{console_url}/login.jsp", method='GET')
+    req.add_header('Content-Type', 'application/json')
+    gcontext = ssl.SSLContext()
+    response = urllib.request.urlopen(req, context=gcontext)
+    headers = response.getheaders()
+    cookie = headers[5][1].split("=")[1].split(";")[0]
+    return cookie
 
-def GetNetstatCommandStatus(i, c, output=None):
-    # Handling api errors
-    if output == None:
-        try:
-            output = ssm_client.get_command_invocation(
-            CommandId = c,
-            InstanceId = i
-            )
-            if output == None:
-                GetNetstatCommandStatus(i, c, None)
-            else:
-                return output
-        except:
-            time.sleep(5)
-            GetNetstatCommandStatus(i, c, None)
+def getConsoleSessionCookie(consoleCookie, uname, pw, console_url):
+    body = {
+        "screenresolution": '1920x1080', 
+        "nexposeccusername" : uname,
+        "nexposeccpassword" : pw
+    }
+    encodedParams = urlencode(body, quote_via=quote_plus).encode('utf-8')
+    req = urllib.request.Request(url=f"{console_url}/data/user/login", method='POST')
+    req.add_header('Accept', 'application/json, text/javascript, */*; q=0.01')
+    req.add_header('X-Requested-With', 'XMLHttpRequest')
+    req.add_header('Accept-Language', 'en-us')
+    req.add_header('Accept-Encoding', 'gzip, deflate')
+    req.add_header('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
+    req.add_header('Orgin', console_url)
+    req.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Safari/605.1.15')
+    req.add_header('Connection', 'close')
+    req.add_header('Referer', console_url)
+    req.add_header('Content-Length', len(encodedParams))
+    req.add_header('Cookie', f"nexposeCCSessionID={consoleCookie}")
+    gcontext = ssl.SSLContext()
+    response = urllib.request.urlopen(req, bytes(encodedParams), context=gcontext)
+    headers = response.getheaders()
+    cookie = headers[4][1].split("=")[1].split(";")[0]
+    return cookie
+
+def getScanEnginePairingKey(sessionCookie, console_url):
+    req = urllib.request.Request(url=f"{console_url}/data/admin/global/shared-secret?time-to-live=3600", method='PUT')
+    req.add_header('Accept', 'application/json, text/javascript, */*; q=0.01')
+    req.add_header('nexposeCCSessionID', sessionCookie)
+    req.add_header('X-Requested-With', 'XMLHttpRequest')
+    req.add_header('Accept-Language', 'en-us')
+    req.add_header('Accept', '*/*')
+    req.add_header('Orgin', console_url)
+    req.add_header('Content-Length', 0)
+    req.add_header('Accept-Encoding', 'gzip, deflate')
+    req.add_header('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
+    req.add_header('Connection', 'close')
+    req.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Safari/605.1.15')
+    req.add_header('Cookie', f"nexposeCCSessionID={sessionCookie}; time-zone-offset=360;  i18next=en-US")
+    gcontext = ssl.SSLContext()
+    response = urllib.request.urlopen(req, context=gcontext)
+    if response.info().get('Content-Encoding') == 'gzip':
+        content = gzip.decompress(response.read())
+        jsonString = content.decode('utf8')
+        data = json.loads(jsonString)
+        return data['keyString']
     else:
-        return output
-        
-def GetNetstatStatus(i):
-    comamnd_id = ExecuteNetstat(i)
-    output = GetNetstatCommandStatus(i, comamnd_id)
-    # Brute force this thing
-    while output == None:
-       output = GetNetstatCommandStatus(i, comamnd_id)
-    while (output['StatusDetails'] == 'InProgress') & (output['Status'] == 'InProgress'):
-        time.sleep(3)
-        output = GetNetstatCommandStatus(i, comamnd_id)
-    
-    results = output['StandardOutputContent'].split("\n")
-    for result in results:
-        if result == 'True':
-            return True
-        if result == 'False':
-            return False
-    
-def CheckService(i): 
-    result = GetNetstatStatus(i)
-    minutes = 1
-    while result != True:
-        if minutes == 40:
-            sys.exit(f"{bcolors.FAIL}Something went wrong while starting to start the NSC service.{bcolors.ENDC}")
-        print(f"{bcolors.WARNING}\nWaiting for NSC service to start. Total minutes: {minutes}{bcolors.ENDC}")
-        time.sleep(60)
-        minutes += 1
-        result = GetNetstatStatus(i)
+        result = json.loads(response.read().decode('utf-8'))
+        return result['keyString']
 
 def CreatePreSharedKey(keyname, path):
     if not os.path.exists(path):
@@ -98,7 +97,7 @@ def CreatePreSharedKey(keyname, path):
             os.chmod(key_file, stat.S_IREAD)
     except:
         print(f"{bcolors.OKGREEN}Key name: {keyname} already exists. Make sure you have access to .pem{bcolors.ENDC}")
-               
+
 def SecurityGroupExists(SGName):
     try:
         security_groups = ec2.security_groups
@@ -109,13 +108,12 @@ def SecurityGroupExists(SGName):
                 return False
     except:
         return False
-    
-def CreateInsightVMSecurityGroup():
 
-    if not SecurityGroupExists('InsightVM'):
-        print(f"{bcolors.OKGREEN}Creating InsightVM Security Group{bcolors.ENDC}")
-        # Create Security Group autorizing ssh and 3780 to console
-        sg = ec2.create_security_group(GroupName='InsightVM', Description="Console/Engine_Connectivity")
+def CreateScanEngineSecurityGroup():
+    if not SecurityGroupExists('ScanEngine'):
+        print(f"{bcolors.OKGREEN}Creating ScanEngine Security Group{bcolors.ENDC}")
+        # Create Security Group autorizing ssh and 80 to console
+        sg = ec2.create_security_group(GroupName='ScanEngine', Description="ScanEngine_Connectivity")
         sg.authorize_ingress(
             IpPermissions=[
                 {
@@ -130,31 +128,20 @@ def CreateInsightVMSecurityGroup():
                     'ToPort': 22,
                 },
                 {
-                    'FromPort': 3780,
+                    'FromPort': 80,
                     'IpProtocol': 'tcp',
                     'IpRanges': [
                         {
                             'CidrIp': '0.0.0.0/0',
-                            'Description': 'console'
+                            'Description': 'http'
                         },
                     ],
-                    'ToPort': 3780,
-                },
-                {
-                    'FromPort': 40815,
-                    'IpProtocol': 'tcp',
-                    'IpRanges': [
-                        {
-                            'CidrIp': '0.0.0.0/0',
-                            'Description': 'EngineToConsole'
-                        },
-                    ],
-                    'ToPort': 40815,
+                    'ToPort': 80,
                 },
             ],
         )
     else:
-        print(f"{bcolors.OKGREEN}InsightVM Security Group alrady exists{bcolors.ENDC}")
+        print(f"{bcolors.OKGREEN}ScanEngine Security Group alrady exists{bcolors.ENDC}")
 
 def GetPublicIp(instanceid):
     time.sleep(5)
@@ -203,25 +190,35 @@ def CreateSSMMangedRole():
         iam.add_role_to_instance_profile(InstanceProfileName='SSMManaged', RoleName='SSMManaged')
         print(f"{bcolors.OKGREEN}SSMManaged Role was created successfully{bcolors.ENDC}")
 
-def CreateEC2(keypair, path):
-    # Read in shell script to execute on startup --runs as root
-    # if not os.path.exists(f"{path}/ivminstall.sh"):
-    #     print(f"{bcolors.FAIL}ivminstall.sh not found.{bcolors.ENDC}")
-    #     sys.exit(f"{bcolors.FAIL}ivminstall.sh needs to be in the same folder as this script.{bcolors.ENDC}")
-    # os.chdir(path)
-    # f = open('./ivminstall.sh', encoding='ascii')
-    # startUpScript = f.read()
+def GetConsoleSecret(publicip, privateip, port, uname, pw):
+    console_url = f"https://{publicip}:{port}"
+    try:
+        cookie  = getConsoleCookie(console_url)
+        sessionCookie = getConsoleSessionCookie(cookie, uname, pw, console_url)
+        key = getScanEnginePairingKey(sessionCookie, console_url)
+        userData = f"""
+NEXPOSE_CONSOLE_HOST={privateip}
+NEXPOSE_CONSOLE_PORT=40815
+NEXPOSE_CONSOLE_SECRET={key}
+"""
+        return userData
+    except :
+        print(f"{bcolors.FAIL}Failed to retrieve shared secret from: {console_url}{bcolors.ENDC}")
+        return False
+    
+
+def CreateEC2(keypair, path, userdata):
     print(f"{bcolors.OKGREEN}Creating EC2{bcolors.ENDC}")
     instance = ec2.create_instances(
-        ImageId='ami-07676e84159cb2cd5',
+        ImageId='ami-08eb0e768c488fef4',
         MinCount=1,
         MaxCount=1,
         InstanceType='m5.large',
         KeyName=keypair,
-        SecurityGroupIds=[
-            'InsightVM',
-        ],
-        #UserData=startUpScript,
+        # SecurityGroupIds=[
+        #     'ScanEngine',
+        # ],
+        UserData=userdata,
         IamInstanceProfile={
             'Name':'SSMManaged'
         }
@@ -261,13 +258,15 @@ def Main():
     path =f'{os.environ["HOME"]}/.aws'
     keypair_name = "ec2-keypair"
     CreatePreSharedKey(keypair_name, path)
-    CreateInsightVMSecurityGroup()
+    #CreateScanEngineSecurityGroup()
     CreateSSMMangedRole()
-    instanceid = CreateEC2(keypair_name, scriptDir)
-    WaitForInstance(instanceid)
-    CheckService(instanceid)
-    publicipv4 = GetPublicIp(instanceid)
-    print(f"{bcolors.OKGREEN}\n\nUSING your browser navigate to:\n\thttps://{publicipv4}:3780{bcolors.ENDC}")
+    # First time password is the instance id // This script is dependent on the console online and basic username/passwprd has been changed
+    userdata = GetConsoleSecret("IPADD", "IPADD", "3780", "nxadmin", "ecadmin")
+    print(userdata)
+    if userdata != False:
+        instanceid = CreateEC2(keypair_name, scriptDir, userdata)
+        WaitForInstance(instanceid)
+        publicipv4 = GetPublicIp(instanceid)
+        print(f'{bcolors.OKGREEN}\nCheck your console to see if scan engine: {publicipv4} paired{bcolors.ENDC}')
    
 Main()
-
