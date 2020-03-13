@@ -86,7 +86,7 @@ def getScanEnginePairingKey(sessionCookie, console_url):
         result = json.loads(response.read().decode('utf-8'))
         return result['keyString']
 
-console_url = "https://IPADD:3780"
+console_url = "https://3.14.141.157:3780"
 cookie  = getConsoleCookie(console_url)
 sessionCookie = getConsoleSessionCookie(cookie, "nxadmin", "ecadmin", console_url)
 key = getScanEnginePairingKey(sessionCookie, console_url)

@@ -261,7 +261,7 @@ def Main():
     #CreateScanEngineSecurityGroup()
     CreateSSMMangedRole()
     # First time password is the instance id // This script is dependent on the console online and basic username/passwprd has been changed
-    userdata = GetConsoleSecret("IPADD", "IPADD", "3780", "nxadmin", "ecadmin")
+    userdata = GetConsoleSecret("3.14.253.21", "172.31.0.146", "3780", "nxadmin", "ecadmin")
     print(userdata)
     if userdata != False:
         instanceid = CreateEC2(keypair_name, scriptDir, userdata)

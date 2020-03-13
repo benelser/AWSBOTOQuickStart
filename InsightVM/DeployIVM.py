@@ -111,50 +111,52 @@ def SecurityGroupExists(SGName):
         return False
     
 def CreateInsightVMSecurityGroup():
-
-    if not SecurityGroupExists('InsightVM'):
-        print(f"{bcolors.OKGREEN}Creating InsightVM Security Group{bcolors.ENDC}")
-        # Create Security Group autorizing ssh and 3780 to console
-        sg = ec2.create_security_group(GroupName='InsightVM', Description="Console/Engine_Connectivity")
-        sg.authorize_ingress(
-            IpPermissions=[
-                {
-                    'FromPort': 22,
-                    'IpProtocol': 'tcp',
-                    'IpRanges': [
-                        {
-                            'CidrIp': '0.0.0.0/0',
-                            'Description': 'ssh'
-                        },
-                    ],
-                    'ToPort': 22,
-                },
-                {
-                    'FromPort': 3780,
-                    'IpProtocol': 'tcp',
-                    'IpRanges': [
-                        {
-                            'CidrIp': '0.0.0.0/0',
-                            'Description': 'console'
-                        },
-                    ],
-                    'ToPort': 3780,
-                },
-                {
-                    'FromPort': 40815,
-                    'IpProtocol': 'tcp',
-                    'IpRanges': [
-                        {
-                            'CidrIp': '0.0.0.0/0',
-                            'Description': 'EngineToConsole'
-                        },
-                    ],
-                    'ToPort': 40815,
-                },
-            ],
-        )
-    else:
-        print(f"{bcolors.OKGREEN}InsightVM Security Group alrady exists{bcolors.ENDC}")
+    try:
+        if not SecurityGroupExists('InsightVM'):
+            print(f"{bcolors.OKGREEN}Creating InsightVM Security Group{bcolors.ENDC}")
+            # Create Security Group autorizing ssh and 3780 to console
+            sg = ec2.create_security_group(GroupName='InsightVM', Description="Console/Engine_Connectivity")
+            sg.authorize_ingress(
+                IpPermissions=[
+                    {
+                        'FromPort': 22,
+                        'IpProtocol': 'tcp',
+                        'IpRanges': [
+                            {
+                                'CidrIp': '0.0.0.0/0',
+                                'Description': 'ssh'
+                            },
+                        ],
+                        'ToPort': 22,
+                    },
+                    {
+                        'FromPort': 3780,
+                        'IpProtocol': 'tcp',
+                        'IpRanges': [
+                            {
+                                'CidrIp': '0.0.0.0/0',
+                                'Description': 'console'
+                            },
+                        ],
+                        'ToPort': 3780,
+                    },
+                    {
+                        'FromPort': 40815,
+                        'IpProtocol': 'tcp',
+                        'IpRanges': [
+                            {
+                                'CidrIp': '0.0.0.0/0',
+                                'Description': 'EngineToConsole'
+                            },
+                        ],
+                        'ToPort': 40815,
+                    },
+                ],
+            )
+        else:
+            print(f"{bcolors.OKGREEN}InsightVM Security Group alrady exists{bcolors.ENDC}")
+    except:
+        print(f"{bcolors.WARNING}Validate InsightVM Security Group attached correctly EC2 Instance.{bcolors.ENDC}")
 
 def GetPublicIp(instanceid):
     time.sleep(5)
@@ -270,4 +272,3 @@ def Main():
     print(f"{bcolors.OKGREEN}\n\nUSING your browser navigate to:\n\thttps://{publicipv4}:3780{bcolors.ENDC}")
    
 Main()
-
