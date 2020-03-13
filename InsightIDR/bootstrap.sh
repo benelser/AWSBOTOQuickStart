@@ -1,0 +1,1 @@
+wget https://github.com/benelser/AWSBOTOQuickStart/tree/master/InsightIDR/InsightSetup-Linux64.tar.gz -O ./InsightSetup-Linux64.tar.gz && sudo tar -xzf ./InsightSetup-Linux64.tar.gz && sudo chmod 755 InsightSetup-Linux64.sh && sudo InsightSetup-Linux64.sh'
