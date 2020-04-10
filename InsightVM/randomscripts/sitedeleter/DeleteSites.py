@@ -35,7 +35,8 @@ def client(username, password, ip, meth, endpoint):
 # Get some environment variables
 username = input("Console username:")
 password = getpass(f"Password for {username}:")
-console = "PLACEIPADDRESSHERE"
+console = input("Console ip address:")
+
 sites = client(username,password,console, "GET", "sites")
 
 # Build site data structure 
