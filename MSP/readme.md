@@ -31,9 +31,8 @@ aws ec2 import-image --description "Server2017" --disk-containers "file:///Users
 Quick start on getting MSP up and running
 
 1. Download Installer
-Windows: [64-Bit](https://downloads.metasploit.com/data/releases/metasploit-latest-windows-installer.exe)
-<br />
-Linux: [64-Bit](https://downloads.metasploit.com/data/releases/metasploit-latest-linux-x64-installer.run)
+- Windows: [64-Bit](https://downloads.metasploit.com/data/releases/metasploit-latest-windows-installer.exe)
+- Linux: [64-Bit](https://downloads.metasploit.com/data/releases/metasploit-latest-linux-x64-installer.run)
 
 2. Install
 Metasploit uses some of the same techniques as malware and malicious attackers to audit your security. For Metasploit to run properly, you must switch off anti-virus solutions and your local firewall before the installation and during its use. If you are not comfortable turning off defenses on this computer, consider installing Metasploit on a dedicated virtual machine (set virtual machine NIC to bridged mode). Ubuntu works great and doesn't incur any OS licensing fees.
