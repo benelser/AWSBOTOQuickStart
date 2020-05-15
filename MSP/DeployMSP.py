@@ -115,7 +115,7 @@ def CreateMetasploitSecurityGroup():
         if not SecurityGroupExists('Metasploit'):
             print(f"{bcolors.OKGREEN}Creating Metasploit Security Group{bcolors.ENDC}")
             # Create Security Group autorizing ssh and 3780 to console
-            sg = ec2.create_security_group(GroupName='Metasploit', Description="Metasploit_Connectivity")
+            sg = ec2.create_security_group(VpcId="vpc-00cb9453fefd1ad28",GroupName='Metasploit', Description="Metasploit_Connectivity")
             sg.authorize_ingress(
                 IpPermissions=[
                     {
@@ -192,21 +192,27 @@ def CreateEC2(keypair, path):
     # f = open('./ivminstall.sh', encoding='ascii')
     # startUpScript = f.read()
     print(f"{bcolors.OKGREEN}Creating EC2{bcolors.ENDC}")
-    instance = ec2.create_instances(
-        ImageId='ami-00f7390b60c41a3c0',
-        MinCount=1,
-        MaxCount=1,
-        InstanceType='t2.2xlarge',
-        KeyName=keypair,
-        SecurityGroupIds=[
-            'Metasploit',
-        ],
-        #UserData=startUpScript,
-        IamInstanceProfile={
-            'Name':'SSMManaged'
-        }
-    )
-    return instance[0].id
+    try:
+        instance = ec2.create_instances(
+            ImageId='ami-00f7390b60c41a3c0',
+            MinCount=1,
+            MaxCount=1,
+            InstanceType='t2.2xlarge',
+            KeyName=keypair,
+            #UserData=startUpScript,
+            IamInstanceProfile={
+                'Name':'SSMManaged'
+            },
+            NetworkInterfaces = [
+                {
+                    'SubnetId': "subnet-06e0699cf64e939fd",
+                    'DeviceIndex': 0
+                }
+            ]
+        )
+        return instance[0].id
+    except:
+        print("May have had issues hooking up security group")
 
 def HookUpIAMProfile(i):
     try:
