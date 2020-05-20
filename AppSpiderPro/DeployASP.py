@@ -131,7 +131,7 @@ def CreateEC2(keypair, path):
     startUpScript = f.read()
     print(f"{bcolors.OKGREEN}Creating EC2{bcolors.ENDC}")
     instance = ec2.create_instances(
-        ImageId='ami-0833104f83deab338',
+        ImageId='ami-0a16ffe32a92704ea',
         MinCount=1,
         MaxCount=1,
         InstanceType='t2.medium',
