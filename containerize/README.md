@@ -30,4 +30,11 @@ sudo docker build --no-cache --pull -f Dockerfile . # Build ref'n current direct
 5. Run
 ```bash
 sudo docker run <imageid>
+sudo docker run  -p 7777:3780 ec7c5096b99e # Exposing port
+```
+5. Run commands 
+```bash
+sudo docker inspect -f '{{.State.Pid}}' frosty_newton # Get pid
+sudo nsenter -t <pid> -n netstat -anop | grep 3780 # specifically if the container does not have the tool on it
+sudo docker stop <CONTAINER ID> # stop container
 ```
