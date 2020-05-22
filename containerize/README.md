@@ -25,5 +25,5 @@ sudo docker pull centos:centos7 # install a base image
     - scripts etc.
 4. Build
 ```bash
-sudo docker build --no-cache - < Dockerfile
+sudo docker build --no-cache --pull -f Dockerfile . # Build ref'n current directory for dependencies
 ```
