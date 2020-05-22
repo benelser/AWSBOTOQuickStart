@@ -1,6 +1,6 @@
 ## Attempt to Containerize Rapid7 Nexpose
 1. Deploy t3.2xl 32GB
-2. 
+2. Get host ready
 ```bash
 sudo apt-get update -y
 sudo apt-get upgrade -y
