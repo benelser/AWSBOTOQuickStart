@@ -221,7 +221,7 @@ function Get-AttackTraffic {
 }
 
 # Parses log and creates AttackTraffic objects for each engine --> server exchange
-$traffic = Get-AttackTraffic -Path "/Users/belser/Downloads/logparser/traffic_00000.log"
+$traffic = Get-AttackTraffic -Path "/Users/belser/aws/AppSpiderPro/randomscripts/TrafficLogParser/traffic_00001.log"
 
 ## Get Post request cookies
 $traffic | Where-Object {$_.Request.Method -eq "Post"} | Select-Object {$_.Request.Headers["user-agent"]}

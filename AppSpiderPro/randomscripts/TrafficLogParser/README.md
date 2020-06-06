@@ -1,6 +1,8 @@
 # Parse AppSpider Traffic Log
 This was created because I am a flawed human being. I do not carry sed,awk,grep, or regex in my head, I'm sorry. I built this for if the time should arise and I need it. If you find use out of go for it. 
 
+[Example log file](./traffic_00001.log)
+
 Tested on:
 ```bash
 PSVersion                      7.0.1
