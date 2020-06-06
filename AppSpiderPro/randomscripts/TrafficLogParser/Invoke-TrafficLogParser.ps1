@@ -82,53 +82,6 @@ function Read-Request {
     $request.Method = $line.Split(" ")[0].Trim()
     $request.URL = $line.Split(" ")[1].Trim()
     $headers = @{}
-    while($true) {
-        $line = $sr.ReadLine()
-        if ([string]::IsNullOrWhiteSpace($line)) {
-            continue
-        }
-        if ($line -eq "============= Response ===================" -or $sr.EndOfStream -eq $true) {
-            $request.Headers = $headers
-            [PSCustomObject]$returnObject = @{
-                Request = $request
-                Position = "============= Response ==================="
-            }
-            return $returnObject
-        
-        }
-        $key = $line.Split(":")[0].Trim()
-        try {
-            $value = $line.Split(":")[1].Trim()
-        }
-        catch {
-            [Console]::WriteLine("No value when parsing`n$line")
-        }
-        $value = $null
-        $headers.Add($key, $value) 
-    }
-    $request.Headers = $headers
-    [PSCustomObject]$returnObject = @{
-        Request = $request
-        Position = "============= Response ==================="
-    }
-    return $returnObject
-
-}
-
-function Read-Request1 {
-    param (
-        [StreamReader]$sr
-    )
-    $line = $sr.ReadLine()
-    while($line -ne "============= Request ===================" -or $sr.EndOfStream -eq $true) {
-        $line = $sr.ReadLine()
-        continue
-    }
-    $line = $sr.ReadLine()
-    $request = [Request]::new()
-    $request.Method = $line.Split(" ")[0].Trim()
-    $request.URL = $line.Split(" ")[1].Trim()
-    $headers = @{}
     do {
         $line = $sr.ReadLine()
         if ([string]::IsNullOrWhiteSpace($line) -or $sr.EndOfStream -eq $true) {
@@ -218,7 +171,6 @@ function Read-Response {
     return $returnObject
 
 }
-
 function Get-AttackTraffic {
     param (
        [string]$Path  
@@ -250,7 +202,7 @@ function Get-AttackTraffic {
             continue
         }
         if ($line -eq "============= Request ===================") {
-            $request = Read-Request1 -sr $log
+            $request = Read-Request -sr $log
             $line = $request.Position
             $counter ++
             continue
