@@ -229,3 +229,7 @@ $traffic | Where-Object {$_.Request.Method -eq "Post"} | Select-Object {$_.Reque
 
 # Get specific exchange
 $55 = $traffic | Where-Object {$_.Detail.Index -eq 55}
+
+# content is == Response.ResponseBody
+# Replay capability
+# $test = iwr "http://hackazon.webscantest.com/user/login" -Method $post[0].Request.Method -Headers $headersTest -SkipHeaderValidation   
